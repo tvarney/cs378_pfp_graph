@@ -16,6 +16,8 @@ namespace cs378 {
         GraphNode(size_t index, std::string label, Point position);
         ~GraphNode();
         
+        bool add(GraphNode *edgeptr);
+        
         size_t index;
         std::string label;
         Point position;

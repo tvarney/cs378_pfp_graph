@@ -35,6 +35,26 @@ GraphNode::GraphNode(size_t index, std::string label, Point position) :
 { }
 GraphNode::~GraphNode() { }
 
+bool GraphNode::add(GraphNode *edgeptr) {
+    if(edgeptr == this) {
+        return false;
+    }
+    
+    bool add = true;
+    for(size_t i = 0; i < edges.size(); ++i) {
+        if(edges[i] == edgeptr) {
+            add = false;
+            break;
+        }
+    }
+    if(add) {
+        edges.push_back(edgeptr);
+        edgeptr->edges.push_back(this);
+    }
+    
+    return add;
+}
+
 Graph::Graph() { }
 Graph::~Graph() { }
 

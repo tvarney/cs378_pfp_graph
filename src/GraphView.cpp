@@ -46,8 +46,6 @@ void GraphView::display() {
     glLoadIdentity();
     
     glLoadMatrixf(transform.data);
-    //glTranslatef(translate.x, translate.y, 0.0f);
-    //glScalef(scale, scale, 1);
     
     const std::vector<GraphNode> &nodes = graph.getNodes();
     
@@ -69,7 +67,7 @@ void GraphView::display() {
     glTranslatef(0,0,-0.5);
     // #D97421
     glColor3f(0.85, 0.45, 0.13);
-    for(size_t i = 0; i < nodes.size(); ++i) {
+    for(size_t i = 0; i < graph.size(); ++i) {
         glPushMatrix();
         glTranslatef(nodes[i].position.x, nodes[i].position.y, 0);
         glScalef(7, 7, 1);
@@ -89,11 +87,33 @@ void GraphView::end() {
 }
 
 void GraphView::keyPressed(int ch) {
+    double x, y;
+    uint32_t tries, edge_id;
+    GraphNode *node;
     if(force) {
-        force = (ch != 'f');
+        if(ch == 'f' || ch == 'q') {
+            force = false;
+            std::cout << "Stopping force simulation" << std::endl;
+        }
         return;
     }
     switch(ch) {
+    case 'a':
+        x = ((uint32_t)random.nextInt32()) % win.dim.width;
+        y = ((uint32_t)random.nextInt32()) % win.dim.height;
+        x -= float(win.dim.width) * 0.5f;
+        y -= float(win.dim.height) * 0.5f;
+        
+        tries = ((uint32_t)random.nextInt32()) % 5 + 2;
+        node = &(graph.add(Point(x, y)));
+        edge_id = node->index;
+        for(uint32_t i = 0; i < tries; ++i) {
+            edge_id = ((uint32_t)random.nextInt32()) % graph.size();
+            std::cout << edge_id << std::endl;
+            node->add(&(graph.get(edge_id)));
+        }
+        View::PostRedisplay();
+        break;
     case 'c':
         c *= 1.1;
         std::cout << "Charge Force: " << c << std::endl;
@@ -104,7 +124,7 @@ void GraphView::keyPressed(int ch) {
         break;
     case 'f':
         force = true;
-        std::cout << "Starting force simulation" << std::endl;
+        std::cout << "Starting force simulation..." << std::endl;
         View::PostRedisplay();
         break;
     case 'q':
@@ -120,6 +140,15 @@ void GraphView::keyPressed(int ch) {
         break;
     case 'n':
         randomize_graph();
+        View::PostRedisplay();
+        break;
+    case 'p':
+        std::cout << "Preturbing nodes..." << std::endl;
+        for(size_t i = 0; i < graph.size(); ++i) {
+            x = double(((uint32_t)random.nextInt32()) % 100) / 49.5f - 1.0f;
+            y = double(((uint32_t)random.nextInt32()) % 100) / 49.5f - 1.0f;
+            graph.get(i).position += Vector(x, y) * 50.0f;
+        }
         View::PostRedisplay();
         break;
     case 'r':
@@ -191,24 +220,12 @@ void GraphView::randomize_graph() {
     
     GraphNode *node = NULL, *edge = NULL;
     uint32_t edge_id;
-    bool add;
     for(uint32_t i = 0; i < graph.size(); ++i) {
         node = &(graph.get(i));
         for(uint32_t j = 0; j < tries; ++j) {
             edge_id = ((uint32_t)random.nextInt32()) % graph.size();
             edge = &(graph.get(edge_id));
-            add = true;
-            for(size_t k = 0; k < node->edges.size(); ++k) {
-                if(node->edges[k] == edge) {
-                    add = false;
-                    break;
-                }
-            }
-            
-            if(add) {
-                node->edges.push_back(edge);
-                edge->edges.push_back(node);
-            }
+            node->add(edge);
         }
     }
 }
