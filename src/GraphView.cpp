@@ -4,11 +4,11 @@
 #include "CircleData.hpp"
 #include "Random.hpp"
 #include "Point3.hpp"
-//#include "Geometry.hpp"
 
 #include <cstdlib>
 #include <iostream>
 
+/* Grab the classes from the cs354 code and make them local to this project */
 namespace cs378 {
     typedef cs354::Point3f Point3f;
     typedef cs354::Vector3f Vector3f;
@@ -17,6 +17,7 @@ namespace cs378 {
 
 using namespace cs378;
 
+/* 'sane' constants. They are all just guesses really.  */
 const double GraphView::DefaultC = 15000.0;
 const double GraphView::DefaultK = 0.005;
 const double GraphView::DefaultMinDelta = 0.05;
@@ -39,7 +40,7 @@ void GraphView::display() {
                 " simulation." << std::endl;
             force = false;
         }
-        View::PostRedisplay(); /*< Schedule a new redisplay */
+        View::PostRedisplay();
     }
     
     glViewport(0,0,win.dim.width, win.dim.height);
@@ -48,6 +49,7 @@ void GraphView::display() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
     
+    /* Set up ortho */
     float left, right, top, bottom;
     right = float(win.dim.width) / 2.0f;
     left = -right;
@@ -61,6 +63,7 @@ void GraphView::display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
+    /* Load the stored matrix */
     glLoadMatrixf(transform.data);
     
     const std::vector<GraphNode> &nodes = graph.getNodes();
@@ -93,7 +96,7 @@ void GraphView::display() {
 }
 
 void GraphView::init() {
-    /* Add initial nodes to graph */
+    /* Set everything to the default value */
     force = false;
     c = GraphView::DefaultC;
     k = GraphView::DefaultK;
@@ -104,12 +107,13 @@ void GraphView::init() {
     density = 0;
     grabbed = NULL;
     
+    /* Report changeable values */
     std::cout << "Charge Force: " << c << std::endl;
     std::cout << "Spring Force: " << k << std::endl;
     std::cout << "Graph Density: " << density << std::endl;
     
+    /* Create a random graph of default density */
     randomize_graph();
-    force = false;
 }
 void GraphView::end() {
     /* Clear graph */
@@ -122,9 +126,11 @@ void GraphView::keyPressed(int ch) {
     GraphNode *node;
     bool has_edge;
     Point3f mod;
+    /* Force simulation running, only allow a few keys */
     if(force) {
         switch(ch) {
         case 'q':
+            /* q is rebound to stop the simulation, not quit */
         case 'f':
             force = false;
             std::cout << "Stopping force simulation" << std::endl;
@@ -135,14 +141,16 @@ void GraphView::keyPressed(int ch) {
         }
         return;
     }
+    
+    /* Not running the force simulation, allow all keys. */
     switch(ch) {
     case 'a':
+        /* Add a node */
         x = ((uint32_t)random.nextInt32()) % win.dim.width;
         y = ((uint32_t)random.nextInt32()) % win.dim.height;
         x -= float(win.dim.width) * 0.5f;
         y -= float(win.dim.height) * 0.5f;
-        mod = Point3f(x, y, 0);
-        mod = undo * mod;
+        mod = undo * Point3f(x, y, 0);
         
         tries = getTries();
         node = &(graph.add(Point(mod.x, mod.y)));
@@ -154,25 +162,29 @@ void GraphView::keyPressed(int ch) {
         /* Guarantee at least 1 edge */
         while(!has_edge) {
             edge_id = ((uint32_t)random.nextInt32()) % graph.size();
-            has_edge |= node->add(&graph.get(edge_id));
+            has_edge |= node->add(&(graph.get(edge_id)));
         }
         View::PostRedisplay();
         break;
     case 'c':
+        /* Increase charge constant */
         c *= 1.1;
         std::cout << "Charge Force: " << c << std::endl;
         break;
     case 'C':
+        /* Decrease charge constant */
         c *= 0.9090909090909091;
         std::cout << "Charge Force: " << c << std::endl;
         break;
     case 'd':
+        /* Increase density */
         density = (density + 1) % 5;
         std::cout << "Graph Density: " << density << std::endl;
         randomize_graph();
         View::PostRedisplay();
         break;
     case 'D':
+        /* Decrease density */
         density -= 1;
         if(density < 0) {
             density = 4;
@@ -182,27 +194,33 @@ void GraphView::keyPressed(int ch) {
         View::PostRedisplay();
         break;
     case 'f':
+        /* Start force simulation */
         force = true;
         std::cout << "Starting force simulation..." << std::endl;
         View::PostRedisplay();
         break;
     case 'k':
+        /* Increase spring constant */
         k *= 1.1;
         std::cout << "Spring Force: " << k << std::endl;
         break;
     case 'K':
+        /* Decrease spring constant */
         k *= 0.9090909090909091;
         std::cout << "Spring Force: " << k << std::endl;
         break;
     case 'l':
+        /* Toggle line displaying */
         draw_lines = !draw_lines;
         View::PostRedisplay();
         break;
     case 'n':
+        /* Create a new graph */
         randomize_graph();
         View::PostRedisplay();
         break;
     case 'p':
+        /* Preturbe nodes - add a random amount to every node in the graph */
         std::cout << "Preturbing nodes..." << std::endl;
         for(size_t i = 0; i < graph.size(); ++i) {
             x = double(((uint32_t)random.nextInt32()) % 100) / 49.5f - 1.0f;
@@ -212,48 +230,58 @@ void GraphView::keyPressed(int ch) {
         View::PostRedisplay();
         break;
     case 'q':
+        /* Quit application */
         std::exit(1);
         break;
     case 'r':
+        /* Rotate the view clockwise */
         transform = transform.rotate(0.017453292519943295f, cs354::AXIS_Z);
         undo = undo.rotate(-0.017453292519943295f, cs354::AXIS_Z);
         View::PostRedisplay();
         break;
     case 'R':
+        /* Rotate the view counter-clockwise */
         transform = transform.rotate(-0.017453292519943295f, cs354::AXIS_Z);
         undo = undo.rotate(0.017453292519943295f, cs354::AXIS_Z);
         View::PostRedisplay();
         break;
     case 's':
+        /* Do one step of the force simulation */
         graph.step(max_delta, c, k);
         View::PostRedisplay();
         break;
     case '+':
+        /* Increase the scale/zoom of the view */
         transform = transform.scale(1.1, 1.1, 1.0);
         undo = undo.scale(0.9090909090909091,0.9090909090909091,1.0);
         View::PostRedisplay();
         break;
     case '=':
+        /* Decrease the scale/zoom of the view */
         transform = transform.scale(0.9090909090909091,0.9090909090909091,1.0);
         undo = undo.scale(1.1, 1.1, 1.0);
         View::PostRedisplay();
         break;
     case cs354::KEY_UP:
+        /* Transform graph up */
         transform = transform.translate(0, -5.0f, 0);
         undo = undo.translate(0, 5.0f, 0);
         View::PostRedisplay();
         break;
     case cs354::KEY_DOWN:
+        /* Transform graph down */
         transform = transform.translate(0, 5.0f, 0);
         undo = undo.translate(0, -5.0f, 0);
         View::PostRedisplay();
         break;
     case cs354::KEY_LEFT:
+        /* Transform graph left */
         transform = transform.translate(-5.0, 0, 0);
         undo = undo.translate(5.0, 0, 0);
         View::PostRedisplay();
         break;
     case cs354::KEY_RIGHT:
+        /* Transform graph right */
         transform = transform.translate(5.0, 0, 0);
         undo = undo.translate(-5.0, 0, 0);
         View::PostRedisplay();
@@ -337,7 +365,6 @@ void GraphView::randomize_graph() {
     graph.clear();
     
     uint32_t tries = getTries();
-    //uint32_t num = ((uint32_t)random.nextInt32()) % 10 + 5*(density+1);
     uint32_t num = _num[density];
     Point3f adjusted;
     Vector3f window(float(win.dim.width)*0.5f, float(win.dim.height)*0.5f, 0);
@@ -346,11 +373,12 @@ void GraphView::randomize_graph() {
                            ((uint32_t)random.nextInt32()) % win.dim.height,
                            0.0f);
         adjusted -= window;
+        /* Project generated point into the local cooridnates */
         adjusted = undo * adjusted;
         graph.add(Point(adjusted.x, adjusted.y));
     }
     
-    GraphNode *node = NULL, *edge = NULL;
+    GraphNode *node = NULL;
     uint32_t edge_id;
     bool has_edge;
     for(uint32_t i = 0; i < graph.size(); ++i) {
@@ -358,13 +386,12 @@ void GraphView::randomize_graph() {
         has_edge = false;
         for(uint32_t j = 0; j < tries; ++j) {
             edge_id = ((uint32_t)random.nextInt32()) % graph.size();
-            edge = &(graph.get(edge_id));
-            has_edge |= node->add(edge);
+            has_edge |= node->add(&(graph.get(edge_id)));
         }
+        /* Guarantee at least 1 edge */
         while(!has_edge) {
             edge_id = ((uint32_t)random.nextInt32()) % graph.size();
-            edge = &(graph.get(edge_id));
-            has_edge |= node->add(edge);
+            has_edge |= node->add(&(graph.get(edge_id)));
         }
     }
 }
