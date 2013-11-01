@@ -94,6 +94,18 @@ void GraphView::keyPressed(int ch) {
         return;
     }
     switch(ch) {
+    case 'c':
+        c *= 1.1;
+        break;
+    case 'C':
+        c *= 0.9090909090909091;
+        break;
+    case 'k':
+        k *= 1.1;
+        break;
+    case 'K':
+        k *= 0.9090909090909091;
+        break;
     case '+':
         transform = transform.scale(1.1, 1.1, 1.0);
         View::PostRedisplay();
