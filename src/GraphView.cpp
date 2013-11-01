@@ -96,27 +96,27 @@ void GraphView::keyPressed(int ch) {
     switch(ch) {
     case 'c':
         c *= 1.1;
+        std::cout << "Charge Force: " << c << std::endl;
         break;
     case 'C':
         c *= 0.9090909090909091;
+        std::cout << "Charge Force: " << c << std::endl;
+        break;
+    case 'f':
+        force = true;
+        std::cout << "Starting force simulation" << std::endl;
+        View::PostRedisplay();
+        break;
+    case 'q':
+        std::exit(1);
         break;
     case 'k':
         k *= 1.1;
+        std::cout << "Spring Force: " << k << std::endl;
         break;
     case 'K':
         k *= 0.9090909090909091;
-        break;
-    case '+':
-        transform = transform.scale(1.1, 1.1, 1.0);
-        View::PostRedisplay();
-        break;
-    case '=':
-        transform = transform.scale(0.9090909090909091,0.9090909090909091,1.0);
-        View::PostRedisplay();
-        break;
-    case 'f':
-        force = !force;
-        View::PostRedisplay();
+        std::cout << "Spring Force: " << k << std::endl;
         break;
     case 'n':
         randomize_graph();
@@ -132,6 +132,14 @@ void GraphView::keyPressed(int ch) {
         break;
     case 's':
         graph.step(c, k);
+        View::PostRedisplay();
+        break;
+    case '+':
+        transform = transform.scale(1.1, 1.1, 1.0);
+        View::PostRedisplay();
+        break;
+    case '=':
+        transform = transform.scale(0.9090909090909091,0.9090909090909091,1.0);
         View::PostRedisplay();
         break;
     case cs354::KEY_UP:
@@ -150,9 +158,6 @@ void GraphView::keyPressed(int ch) {
         transform = transform.translate(5.0, 0, 0);
         View::PostRedisplay();
         break;
-    case 'q':
-        std::exit(1);
-        break;
     default:
         break;
     }
@@ -170,7 +175,6 @@ void GraphView::motion(int x, int y) {
 static GraphNode _GN_none;
 
 void GraphView::randomize_graph() {
-    RandomLCG random;
     graph.clear();
     
     float half_width = float(win.dim.width) * 0.5f;

@@ -4,6 +4,7 @@
 
 #include "Graph.hpp"
 #include "Matrix.hpp"
+#include "Random.hpp"
 #include "View.hpp"
 
 namespace cs378 {
@@ -27,6 +28,7 @@ namespace cs378 {
         double min_delta, max_delta;
         cs354::Matrix<float> transform;
         int mouse_mode;
+        RandomLCG random;
         Graph graph;
     };
 }
