@@ -38,7 +38,7 @@ GraphNode::~GraphNode() { }
 Graph::Graph() { }
 Graph::~Graph() { }
 
-double Graph::step(double c, double k, bool approx) {
+double Graph::step(double max_delta, double c, double k, bool approx) {
     /* Calculate charge force */
     if(approx) {
         charge_approx(c);
@@ -61,6 +61,9 @@ double Graph::step(double c, double k, bool approx) {
     double largest = 0.0, next;
     for(size_t i = 0; i < nodes.size(); ++i) {
         next = std::fabs(nodes[i].force.magnitude());
+        if(next > max_delta) {
+            next = max_delta;
+        }
         if(next > largest) {
             largest = next;
         }

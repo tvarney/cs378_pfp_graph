@@ -27,7 +27,7 @@ namespace cs378 {
     public:
         Graph();
         ~Graph();
-        double step(double c, double k, bool approx = false);
+        double step(double max_delta, double c, double k, bool approx = false);
         
         GraphNode & add(Point position = Point::Origin);
         GraphNode & add(const std::string &label, Point position);

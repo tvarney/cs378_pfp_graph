@@ -17,7 +17,7 @@ GraphView::~GraphView() { }
 
 void GraphView::display() {
     if(force) {
-        double largest = graph.step(c, k);
+        double largest = graph.step(max_delta, c, k);
         if(largest < min_delta) {
             std::cout << "Largest delta smaller than lower bound, ending force"
                 " simulation." << std::endl;
@@ -131,7 +131,7 @@ void GraphView::keyPressed(int ch) {
         View::PostRedisplay();
         break;
     case 's':
-        graph.step(c, k);
+        graph.step(max_delta, c, k);
         View::PostRedisplay();
         break;
     case '+':
