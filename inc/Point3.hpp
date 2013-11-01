@@ -3,6 +3,8 @@
 #define CS354_GENERIC_POINT_HPP
 
 #include <ostream>
+#include "Vector3.hpp"
+
 namespace cs354 {
     template <typename T>
     struct Point3 {
@@ -15,6 +17,30 @@ namespace cs354 {
             x(source.x), y(source.y), z(source.z)
         { }
         ~Point3() { }
+        
+        Point3<T> operator+(const Vector3<T> rhs) const {
+            return Point3<T>(x + rhs.x, y + rhs.y, z + rhs.z);
+        }
+        Point3<T> operator-(const Vector3<T> rhs) const {
+            return Point3<T>(x - rhs.x, y - rhs.y, z - rhs.z);
+        }
+        Vector3<T> operator-(const Point3<T> rhs) const {
+            return Vector3<T>(x - rhs.x, y - rhs.y, z - rhs.z);
+        }
+        
+        Point3<T> & operator=(const Point3<T> rhs) {
+            x = rhs.x;
+            y = rhs.y;
+            z = rhs.z;
+            return *this;
+        }
+        
+        Point3<T> & operator+=(const Vector3<T> rhs) {
+            return *this = *this + rhs;
+        }
+        Point3<T> & operator-=(const Vector3<T> rhs) {
+            return *this = *this - rhs;
+        }
         
         static const Point3<T> Origin;
     };

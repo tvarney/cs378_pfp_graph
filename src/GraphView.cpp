@@ -4,23 +4,29 @@
 #include "CircleData.hpp"
 #include "Random.hpp"
 #include "Point3.hpp"
+//#include "Geometry.hpp"
 
 #include <cstdlib>
 #include <iostream>
+
+namespace cs378 {
+    typedef cs354::Point3f Point3f;
+    typedef cs354::Vector3f Vector3f;
+    typedef cs354::Matrix<float> Matrixf;
+}
 
 using namespace cs378;
 
 const double GraphView::DefaultC = 15000.0;
 const double GraphView::DefaultK = 0.005;
 const double GraphView::DefaultMinDelta = 0.05;
-const double GraphView::DefaultMaxDelta = 50.0;
+const double GraphView::DefaultMaxDelta = 25.0;
 
 GraphView::GraphView() :
     force(false), c(GraphView::DefaultC), k(GraphView::DefaultK),
     min_delta(GraphView::DefaultMinDelta),
     max_delta(GraphView::DefaultMaxDelta),
-    transform(cs354::Matrix<float>::Identity()),
-    undo(cs354::Matrix<float>::Identity()),
+    transform(Matrixf::Identity()), undo(Matrixf::Identity()),
     density(0), grabbed(NULL), enable_mouse(false), draw_lines(true)
 { }
 GraphView::~GraphView() { }
@@ -93,8 +99,8 @@ void GraphView::init() {
     k = GraphView::DefaultK;
     min_delta = GraphView::DefaultMinDelta;
     max_delta = GraphView::DefaultMaxDelta;
-    transform = cs354::Matrix<float>::Identity();
-    undo = cs354::Matrix<float>::Identity();
+    transform = Matrixf::Identity();
+    undo = Matrixf::Identity();
     density = 0;
     grabbed = NULL;
     
@@ -115,7 +121,7 @@ void GraphView::keyPressed(int ch) {
     uint32_t tries, edge_id;
     GraphNode *node;
     bool has_edge;
-    cs354::Point3<float> mod;
+    Point3f mod;
     if(force) {
         switch(ch) {
         case 'q':
@@ -135,7 +141,7 @@ void GraphView::keyPressed(int ch) {
         y = ((uint32_t)random.nextInt32()) % win.dim.height;
         x -= float(win.dim.width) * 0.5f;
         y -= float(win.dim.height) * 0.5f;
-        mod = cs354::Point3<float>(x, y, 0);
+        mod = Point3f(x, y, 0);
         mod = undo * mod;
         
         tries = getTries();
@@ -268,8 +274,7 @@ void GraphView::mousePressed(cs354::MouseButton button,
     Point position(mouse.pos.x, mouse.pos.y);
     Vector mod(float(win.dim.width)*0.5f, float(win.dim.height)*0.5f);
     position -= mod;
-    cs354::Point3<float> npos = undo *
-        cs354::Point3<float>(position.x, position.y, 0);
+    Point3f npos = undo * Point3f(position.x, position.y, 0);
     position = Point(npos.x, npos.y);
     std::cout << "Scaled coordinates: " << position << std::endl;
     
@@ -298,7 +303,7 @@ void GraphView::motion(int x, int y) {
     if(!enable_mouse) {
         return;
     }
-    cs354::Vector3<float> vec(x - mouse.pos.x, y - mouse.pos.y, 0);
+    Vector3f vec(x - mouse.pos.x, y - mouse.pos.y, 0);
     vec = undo * vec;
     Vector delta(vec.x, vec.y);
     
@@ -312,44 +317,37 @@ void GraphView::motion(int x, int y) {
     }
 }
 
-static GraphNode _GN_none;
+static uint32_t _tries[] = {
+    3, 6, 15, 20, 25
+};
+static uint32_t _num[] = {
+    20, 30, 50, 70, 100
+};
 
 uint32_t GraphView::getTries() {
-    switch(density) {
-    default:
+    if(density < 0) {
         density = 0;
-    case 0:
-        return ((uint32_t)random.nextInt32()) % 2 + 2;
-        break;
-    case 1:
-        return ((uint32_t)random.nextInt32()) % 4 + 4;
-        break;
-    case 2:
-        return ((uint32_t)random.nextInt32()) % 10 + 10;
-        break;
-    case 3:
-        return ((uint32_t)random.nextInt32()) % 10 + 15;
-        break;
-    case 4:
-        return ((uint32_t)random.nextInt32()) % 15 + 25;
-        break;
+    }else if(density > 4) {
+        density = 4;
     }
-    return 10;
+    
+    return _tries[density];
 }
 void GraphView::randomize_graph() {
     graph.clear();
     
-    float half_width = float(win.dim.width) * 0.5f;
-    float half_height = float(win.dim.height) * 0.5f;
-    
     uint32_t tries = getTries();
-    uint32_t num = ((uint32_t)random.nextInt32()) % 10 + 5*(density+1);
-    std::cout << "Trying to make " << tries << " edges per node" << std::endl;
-    float x, y;
+    //uint32_t num = ((uint32_t)random.nextInt32()) % 10 + 5*(density+1);
+    uint32_t num = _num[density];
+    Point3f adjusted;
+    Vector3f window(float(win.dim.width)*0.5f, float(win.dim.height)*0.5f, 0);
     for(uint32_t i = 0; i < num; ++i) {
-        y = ((uint32_t)random.nextInt32()) % win.dim.height - half_height;
-        x = ((uint32_t)random.nextInt32()) % win.dim.width - half_width;
-        graph.add(Point(x, y));
+        adjusted = Point3f(((uint32_t)random.nextInt32()) % win.dim.width,
+                           ((uint32_t)random.nextInt32()) % win.dim.height,
+                           0.0f);
+        adjusted -= window;
+        adjusted = undo * adjusted;
+        graph.add(Point(adjusted.x, adjusted.y));
     }
     
     GraphNode *node = NULL, *edge = NULL;
