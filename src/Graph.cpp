@@ -1,33 +1,11 @@
 
 #include "Graph.hpp"
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <iostream>
 
 using namespace cs378;
-
-/*
-enum QuadTreeNodeType {
-    QUADTREE_BRANCH,
-    QUADTREE_LEAF,
-};
-struct QuadTreeNode {
-    QuadTreeNodeType type;
-};
-struct QuadTreeBranch : public QuadTreeNode {
-    QuadTreeBranch(QuadTreeLeaf &leaf);
-    ~QuadTreeBranch();
-    
-    Point center
-    QuadTreeNode *children[4];
-};
-
-struct QuadTree {
-    QuadTree(std::vector<GraphNode> &nodes, size_t partition);
-    ~QuadTree();
-    
-};
-*/
 
 GraphNode::GraphNode() : index(0), label("") { }
 GraphNode::GraphNode(size_t index, std::string label, Point position) :
@@ -55,7 +33,9 @@ bool GraphNode::add(GraphNode *edgeptr) {
     return add;
 }
 
-Graph::Graph() { }
+Graph::Graph() :
+    min_x(FLT_MAX), min_y(FLT_MAX), max_x(-FLT_MAX), max_y(-FLT_MAX)
+{ }
 Graph::~Graph() { }
 
 double Graph::step(double max_delta, double c, double k, bool approx) {
@@ -98,12 +78,36 @@ GraphNode & Graph::add(Point position) {
     std::sprintf(buffer, "Node %llu", (unsigned long long)len);
     std::string label(buffer);
     nodes.push_back(GraphNode(len, label, position));
+    if(position.x < min_x) {
+        min_x = position.x;
+    }
+    if(position.x > max_x) {
+        max_x = position.x;
+    }
+    if(position.y < min_y) {
+        min_y = position.y;
+    }
+    if(position.y > max_y) {
+        max_y = position.y;
+    }
     return nodes[len];
 }
 
 GraphNode & Graph::add(const std::string &label, Point position) {
     size_t len = nodes.size();
     nodes.push_back(GraphNode(len, label, position));
+    if(position.x < min_x) {
+        min_x = position.x;
+    }
+    if(position.x > max_x) {
+        max_x = position.x;
+    }
+    if(position.y < min_y) {
+        min_y = position.y;
+    }
+    if(position.y > max_y) {
+        max_y = position.y;
+    }
     return nodes[len];
 }
 

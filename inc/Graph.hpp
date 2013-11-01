@@ -43,6 +43,7 @@ namespace cs378 {
         void charge_approx(double c);
         void charge_normal(double c); 
         std::vector<GraphNode> nodes;
+        float min_x, min_y, max_x, max_y;
     };
 }
 

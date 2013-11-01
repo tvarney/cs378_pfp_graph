@@ -5,6 +5,7 @@
 #include <cstring>
 #include <stddef.h>
 #include "Vector3.hpp"
+#include "Point3.hpp"
 
 namespace cs354 {
     enum Axis {
@@ -80,6 +81,20 @@ namespace cs354 {
         T & operator[](size_t i) {
             return data[i];
         }
+        /* I'm lazy */
+#define rhs (*this)
+        Point3<T> operator*(const Point3<T> &lhs) const {
+            return Point3<T>(lhs.x*rhs[0]+lhs.y*rhs[4]+lhs.z*rhs[8]+rhs[12],
+                             lhs.x*rhs[1]+lhs.y*rhs[5]+lhs.z*rhs[9]+rhs[13],
+                             lhs.x*rhs[2]+lhs.y*rhs[6]+lhs.z*rhs[10]+rhs[14]);
+        }
+        Vector3<T> operator*(const Vector3<T> &lhs) const {
+            return Vector3<T>(lhs.x*rhs[0] + lhs.y*rhs[4] + lhs.z*rhs[8],
+                              lhs.x*rhs[1] + lhs.y*rhs[5] + lhs.z*rhs[9],
+                              lhs.x*rhs[2] + lhs.y*rhs[6] + lhs.z*rhs[10]);
+        }
+#undef rhs
+
         Matrix<T> operator*(const Matrix &rhs) const {
             Matrix<T> r;
             const T *a = data;
@@ -314,5 +329,4 @@ namespace cs354 {
         return out;
     }
 }
-
 #endif

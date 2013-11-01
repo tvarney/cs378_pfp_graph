@@ -21,15 +21,23 @@ namespace cs378 {
         void mousePressed(cs354::MouseButton button, cs354::ButtonState state);
         void motion(int x, int y);
     protected:
+        uint32_t getTries();
         void randomize_graph();
         
         bool force;
         double c, k;
         double min_delta, max_delta;
-        cs354::Matrix<float> transform;
-        int mouse_mode;
+        cs354::Matrix<float> transform, undo;
+        int density;
+        GraphNode *grabbed;
+        bool enable_mouse, draw_lines;
         RandomLCG random;
         Graph graph;
+        
+        static const double DefaultC;
+        static const double DefaultK;
+        static const double DefaultMinDelta;
+        static const double DefaultMaxDelta;
     };
 }
 
